@@ -1,4 +1,5 @@
-const UserModel = require('../model/userModel')
+const UserModel = require('../model/userModel');
+const { generateTokens, updateRefreshToken } = require('../middleware/auth');
 
 async function getUsers() {
     let option = {
@@ -30,7 +31,7 @@ async function deleteUser(id) {
             await user.remove()
             return {
                 success: true,
-                message:"Xóa tài khoản thành công."
+                message: "Xóa tài khoản thành công."
 
             };
         } catch (err) {
@@ -41,7 +42,7 @@ async function deleteUser(id) {
     }
 }
 
-async function  createUser(body) {
+async function createUser(body) {
     const user = new UserModel(body);
 
     try {
@@ -49,15 +50,40 @@ async function  createUser(body) {
         return {
             success: true,
             data: newUser,
-            message:"Thêm mới tài khoản thành công."
+            message: "Thêm mới tài khoản thành công."
         };
     } catch (err) {
         return { success: false, message: "Thêm mới tài khoản thất bại." };
     }
 }
 
+async function LoginUser(req) {
+    let response = await getUsers();
+    let users = response.data
+    if (response.success) {
+        console.log(response)
+        let user = users.find((u) => (u.username === req.body.username && u.password === req.body.password))
+        if (user) {
+            const username = req.body.username
+            const tokens = generateTokens(user)
+            updateRefreshToken(username, tokens.refreshToken);
+            return {
+                success: true,
+                data: tokens,
+                message: "Đăng nhập thành công."
+            }
+        } else {
+            return {
+                success: false,
+                data: null,
+                message: "Đăng nhập thất bại"
+            }
+        }
+    }
+}
 module.exports = {
     getUsers,
     deleteUser,
-    createUser
+    createUser,
+    LoginUser
 }

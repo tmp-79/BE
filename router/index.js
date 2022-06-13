@@ -1,8 +1,9 @@
 const express = require('express');
-const { getUsers, deleteUser, createUser } = require('../controllers/userController');
+const { getUsers, deleteUser, LoginUser, createUser } = require('../controllers/userController');
 const router = express.Router()
-const jwt = require('jsonwebtoken')
-const verifyToken = require('../middleware/auth')
+const jwt = require('jsonwebtoken');
+const { verifyToken, generateTokens, updateRefreshToken } = require('../middleware/auth');
+const { createTemplate, getAllTemplate, deleteTemplate } = require('../controllers/templateController');
 
 
 
@@ -15,9 +16,8 @@ const verifyToken = require('../middleware/auth')
  *       200:
  *         description: Returns all the catachphrases
  */
-router.get('/api/users',verifyToken, async function (req, res) {
+router.get('/api/users', async function (req, res) {
 	let response = await getUsers();
-	console.log("res:", response)
 	if (response.success) {
 		res.status(200);
 		res.send(response)
@@ -25,6 +25,7 @@ router.get('/api/users',verifyToken, async function (req, res) {
 
 	}
 })
+
 
 router.post('/api/users', async function (req, res) {
 	let body = {
@@ -54,63 +55,19 @@ router.post('/api/users', async function (req, res) {
 
 // authen
 
-const generateTokens = payload => {
-	const { id, username } = payload
 
-	// Create JWT
-	const accessToken = jwt.sign(
-		{ id, username },
-		process.env.ACCESS_TOKEN_SECRET,
-		{
-			expiresIn: '5m'
-		}
-	)
-
-	const refreshToken = jwt.sign(
-		{ id, username },
-		process.env.REFRESH_TOKEN_SECRET,
-		{
-			expiresIn: '1h'
-		}
-	)
-
-	return { accessToken, refreshToken }
-}
-
-const updateRefreshToken = async (username, refreshToken) => {
-	let response = await getUsers();
-	let users;
-	if (response.success) {
-		users = response.data.map((u) => {
-			if (u.username === username)
-				return {
-					...u,
-					refreshToken
-				}
-			return u
-		})
-	}
-}
 
 router.post('/api/login', async (req, res) => {
-	let response = await getUsers();
-	let users = response.data
+	let response = await LoginUser(req);
 	if (response.success) {
-		console.log(response)
-		let user = users.find((u) => (u.username === req.body.username && u.password === req.body.password))
-		if (user) {
-			const username = req.body.username
-			const tokens = generateTokens(user)
-			updateRefreshToken(username, tokens.refreshToken);
-			res.status(201)
-			res.json({ ...tokens, success: true, message: "Đăng nhập thành công" })
-		} else {
-			res.status(403);
-			res.send({
-				success: false,
-				message: "Không tìm thấy thông tin!"
-			})
-		}
+		res.status(201)
+		res.json({ ...response.data, success: true, message: "Đăng nhập thành công" })
+	} else {
+		res.status(403);
+		res.send({
+			success: false,
+			message: "Không tìm thấy thông tin!"
+		})
 	}
 })
 
@@ -139,6 +96,53 @@ router.delete('/api/logout', verifyToken, (req, res) => {
 	updateRefreshToken(user.username, null)
 
 	res.sendStatus(204)
+})
+
+router.post('/api/template/create', async (req, res) => {
+	let response = await createTemplate(req.body);
+	if(response.success){
+		res.status(201);
+		res.send({
+			...response
+		})
+	} else{
+		res.status(401);
+		res.send({
+			...response
+		})
+	}
+})
+
+router.post('/api/template',async (req,res)=>{
+	const response = await getAllTemplate();
+	if(response.success){
+		res.status(201);
+		res.send({
+			...response
+		})
+	} else{
+		res.status(401);
+		res.send({
+			...response
+		})
+	}
+})
+
+router.delete('/api/template/:id',async(req,res)=>{
+		let idTemplate = req.params.id;
+		console.log(idTemplate)
+		let response = await deleteTemplate(idTemplate);
+		if(response.success){
+			res.status(201);
+			res.send({
+				...response
+			})
+		} else{
+			res.status(401);
+			res.send({
+				...response
+			})
+		}
 })
 
 
