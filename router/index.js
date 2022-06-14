@@ -3,7 +3,7 @@ const { getUsers, deleteUser, LoginUser, createUser } = require('../controllers/
 const router = express.Router()
 const jwt = require('jsonwebtoken');
 const { verifyToken, generateTokens, updateRefreshToken } = require('../middleware/auth');
-const { createTemplate, getAllTemplate, deleteTemplate } = require('../controllers/templateController');
+const { createTemplate, getAllTemplate, deleteTemplate, updateTemplate } = require('../controllers/templateController');
 
 
 
@@ -100,12 +100,12 @@ router.delete('/api/logout', verifyToken, (req, res) => {
 
 router.post('/api/template/create', async (req, res) => {
 	let response = await createTemplate(req.body);
-	if(response.success){
+	if (response.success) {
 		res.status(201);
 		res.send({
 			...response
 		})
-	} else{
+	} else {
 		res.status(401);
 		res.send({
 			...response
@@ -113,14 +113,14 @@ router.post('/api/template/create', async (req, res) => {
 	}
 })
 
-router.post('/api/template',async (req,res)=>{
+router.post('/api/template', async (req, res) => {
 	const response = await getAllTemplate();
-	if(response.success){
+	if (response.success) {
 		res.status(201);
 		res.send({
 			...response
 		})
-	} else{
+	} else {
 		res.status(401);
 		res.send({
 			...response
@@ -128,21 +128,39 @@ router.post('/api/template',async (req,res)=>{
 	}
 })
 
-router.delete('/api/template/:id',async(req,res)=>{
-		let idTemplate = req.params.id;
-		console.log(idTemplate)
-		let response = await deleteTemplate(idTemplate);
-		if(response.success){
-			res.status(201);
-			res.send({
-				...response
-			})
-		} else{
-			res.status(401);
-			res.send({
-				...response
-			})
-		}
+router.delete('/api/template/:id', async (req, res) => {
+	let idTemplate = req.params.id;
+	console.log(idTemplate)
+	let response = await deleteTemplate(idTemplate);
+	if (response.success) {
+		res.status(201);
+		res.send({
+			...response
+		})
+	} else {
+		res.status(401);
+		res.send({
+			...response
+		})
+	}
+})
+
+router.put('/api/template/:id', async (req, res) => {
+	let id = req.params.id;
+	let body = req.query;
+	const response = await updateTemplate(id, body);
+	console.log("response:",response);
+	if (response.success) {
+		res.status(201);
+		res.send({
+			...response
+		})
+	} else {
+		res.status(401);
+		res.send({
+			...response
+		})
+	}
 })
 
 

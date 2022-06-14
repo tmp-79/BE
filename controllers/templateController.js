@@ -9,7 +9,7 @@ async function getAllTemplate() {
         return {
             data: templates,
             success: true,
-            message:"Lấy danh sách thành công"
+            message: "Lấy danh sách thành công"
         }
     } catch (err) {
         return { success: false, message: "Không tìm thấy giao diện nào." };
@@ -29,7 +29,7 @@ async function deleteTemplate(id) {
             return {
                 success: true,
                 message: "Xóa giao diện thành công.",
-                data:template
+                data: template
 
             };
         } catch (err) {
@@ -37,7 +37,31 @@ async function deleteTemplate(id) {
         }
     } catch (err) {
         return { success: false, message: err.message };
-    }  
+    }
+}
+
+async function updateTemplate(id, body) {
+    let template;
+    try {
+        template = await Template.updateOne({
+            _id: id
+        }, { ...body });
+        if (template == null) {
+            return { success: false, message: 'Không tìm thấy giao diện' };
+        }
+        try {
+            return {
+                success: true,
+                message: "Cập nhật giao diện thành công.",
+                data: template
+
+            };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    } catch (err) {
+        return { success: false, message: err.message };
+    }
 }
 
 
@@ -58,5 +82,6 @@ async function createTemplate(body) {
 module.exports = {
     getAllTemplate,
     deleteTemplate,
-    createTemplate
+    createTemplate,
+    updateTemplate
 }
