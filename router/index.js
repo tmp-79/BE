@@ -73,10 +73,10 @@ router.post('/api/login', async (req, res) => {
 
 router.post('/api/token', (req, res) => {
 	const refreshToken = req.body.refreshToken
-	if (!refreshToken) return res.sendStatus(401)
+	if (!refreshToken) return res.sendStatus(200)
 
 	const user = users.find(user => user.refreshToken === refreshToken)
-	if (!user) return res.sendStatus(403)
+	if (!user) return res.sendStatus(200)
 
 	try {
 		jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
@@ -87,7 +87,7 @@ router.post('/api/token', (req, res) => {
 		res.json(tokens)
 	} catch (error) {
 		console.log(error)
-		res.sendStatus(403)
+		res.sendStatus(200)
 	}
 })
 
@@ -100,6 +100,7 @@ router.delete('/api/logout', verifyToken, (req, res) => {
 
 router.post('/api/template/create', async (req, res) => {
 	let response = await createTemplate(req.body);
+	console.log("response,",response)
 	if (response.success) {
 		res.status(201);
 		res.send({

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const template = new Schema({
     name: {
         type: String,
-        required: true
+        required: false
     },
     image: {
         type: Array,
@@ -20,7 +20,7 @@ const template = new Schema({
     },
     price: {
         type: String,
-        required:true
+        required:false
     },
     language: {
         type: Array,
@@ -28,7 +28,7 @@ const template = new Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false
     }
 }, { timestamps: true });
 
